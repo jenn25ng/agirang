@@ -414,6 +414,22 @@ body {
  * ========================================================================= */
 
 const SHOWS = [
+  /* ---------------------------------------------------------------- ⭐ 우리 아기 최애 (직접 고른 영상) */
+  {
+    id: "faves",
+    title: { ko: "우리 아기 최애", en: "Baby's Favorites" },
+    tagline: { ko: "제일 좋아하는 것만 모았어요", en: "Hand-picked favorites" },
+    emoji: "⭐",
+    color: "#ff8fab",
+    langs: ["ko"],
+    channels: {},
+    seasons: [
+      // videos: 좋아하는 영상 ID를 순서대로. 여기만 늘리면 최애가 추가됨.
+      { n: "fav", title: { ko: "최애 모음", en: "Favorites" },
+        videos: ["ym_2WnojZHs", "lWlgcVXfv8w"] },
+    ],
+  },
+
   /* ---------------------------------------------------------------- 넘버블럭스 */
   {
     id: "numberblocks",
@@ -716,7 +732,7 @@ const SHOWS = [
       // 시즌에 langs가 지정돼 있으면 해당 언어에서만 노출
       // (예: 넘버블록스 – 영어는 시즌별, 한국어는 '전체 에피소드' 통합)
       if (season.langs && !season.langs.includes(lang)) return;
-      const hasList = !!(season.list && season.list[lang]);
+      const hasList = !!((season.list && season.list[lang]) || (season.videos && season.videos.length));
       const row = document.createElement("button");
       row.className = "season-row" + (hasList ? "" : " season-row--fallback");
       row.style.setProperty("--card-color", s.color);
@@ -776,23 +792,34 @@ const SHOWS = [
   function openPlayer(season, startIndex) {
     const s = state.show;
     const lang = state.lang;
-    const listId = season.list[lang];
+    const listId = season.list ? season.list[lang] : null;
+    const videos = season.videos || null; // 최애 모음처럼 특정 영상 배열
     const idx = startIndex || 1;
 
     state.player = {
       season,
       listId,
+      videos,
       index: idx,
       baseTitle: `${s.title[lang] || s.title.ko} – ${season.title[lang] || season.title.ko}`,
     };
 
     $("#epStrip").style.setProperty("--card-color", s.color);
     $("#playerTitle").textContent = state.player.baseTitle + (idx > 1 ? ` · ${idx}화` : "");
-    $("#openYoutube").href = `https://www.youtube.com/playlist?list=${listId}`;
+    updateOpenYoutube();
     renderEpisodeStrip(season, idx);
     createPlayerFor(state.player);
 
     show("player");
+  }
+
+  // "유튜브에서 열기" 링크를 현재 재생 대상에 맞춰 갱신
+  function updateOpenYoutube() {
+    const p = state.player;
+    if (!p) return;
+    $("#openYoutube").href = p.videos
+      ? `https://www.youtube.com/watch?v=${p.videos[(p.index || 1) - 1] || p.videos[0]}`
+      : `https://www.youtube.com/playlist?list=${p.listId}`;
   }
 
   // 매번 새 플레이어 생성 → 재생목록 전환 신뢰성 확보. 첫 진입은 cuePlaylist(포스터, 자동재생 X).
@@ -811,7 +838,9 @@ const SHOWS = [
       playerVars: { rel: 0, modestbranding: 1, playsinline: 1, origin: location.origin },
       events: {
         onReady: () => {
-          ytPlayer.cuePlaylist({ listType: "playlist", list: p.listId, index: (p.index || 1) - 1 });
+          const i = (p.index || 1) - 1;
+          if (p.videos) ytPlayer.cuePlaylist(p.videos, i);
+          else ytPlayer.cuePlaylist({ listType: "playlist", list: p.listId, index: i });
         },
       },
     });
@@ -823,13 +852,15 @@ const SHOWS = [
     if (!p || !ytPlayer || !ytPlayer.loadPlaylist) return;
     p.index = index;
     $("#playerTitle").textContent = p.baseTitle + (index > 1 ? ` · ${index}화` : "");
-    ytPlayer.loadPlaylist({ listType: "playlist", list: p.listId, index: index - 1 });
+    if (p.videos) ytPlayer.loadPlaylist(p.videos, index - 1);
+    else ytPlayer.loadPlaylist({ listType: "playlist", list: p.listId, index: index - 1 });
+    updateOpenYoutube();
   }
 
   // 에피소드 번호 칩 (epCount 있는 시즌만)
   function renderEpisodeStrip(season, currentIndex) {
     const wrap = $("#epStrip");
-    const n = season.epCount;
+    const n = season.epCount || (season.videos && season.videos.length);
     if (!n) {
       wrap.innerHTML = "";
       wrap.classList.add("hidden");
