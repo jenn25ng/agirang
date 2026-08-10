@@ -337,6 +337,25 @@ body {
   padding: 20px 16px 30px;
 }
 .app-footer span { font-family: var(--font-round); }
+/* ---------------------------------------------------------------- 쿠팡 파트너스 배너 (홈 하단, 부모용) */
+.coupang-ad {
+  margin: 26px auto 4px;
+  text-align: center;
+}
+.coupang-ad a { display: inline-block; line-height: 0; }
+.coupang-ad img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+.coupang-note {
+  margin: 8px auto 0;
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+  max-width: 340px;
+}
 .editor-link {
   display: inline-block;
   margin-top: 8px;
@@ -363,6 +382,12 @@ body {
       모든 영상은 각 프로그램의 <strong>공식 유튜브 채널</strong>에서 무료로 공개한 재생목록을 불러와 보여줍니다.
       이 앱은 영상을 저장하거나 재배포하지 않아요.
     </p>
+    <div class="coupang-ad">
+      <a href="https://link.coupang.com/a/f55R5GZBDg" target="_blank" rel="noopener sponsored" referrerpolicy="unsafe-url">
+        <img src="https://ads-partners.coupang.com/banners/1015943?trackingCode=AF8994044&subId=&traceId=V0-301-5f4982b43e2b4522-I1015943&w=320&h=100" alt="쿠팡 파트너스 광고" loading="lazy" />
+      </a>
+      <p class="coupang-note">이 페이지는 쿠팡 파트너스 활동의 일환으로, 이에 따라 일정액의 수수료를 제공받습니다.</p>
+    </div>
   </main>
 
   <!-- ===== 프로그램 상세: 시즌 목록 ===== -->
