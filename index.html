@@ -500,14 +500,24 @@ const SHOWS = [
       ko: "https://www.youtube.com/channel/UCPUeGC_AL-OnDQORKhRm6iA",
       en: "https://www.youtube.com/channel/UCAmia3u27mHY-Y6c-lwakAQ",
     },
+    // 영어: 공식 Pororo 채널의 시즌별 재생목록(접두어 PLif0g7abcI4) + 회차 칩(epCount)
+    //   ※ 정식 에피소드에 노래/모음이 섞여 있어 칩 번호는 '재생목록 내 위치'
+    // 한국어: 공식 시즌 재생목록이 없어 채널 이동(폴백) 유지
     seasons: [
-      { n: 1, title: { ko: "시즌 1", en: "Season 1" } },
-      { n: 2, title: { ko: "시즌 2", en: "Season 2" } },
-      { n: 3, title: { ko: "시즌 3", en: "Season 3" } },
-      { n: 4, title: { ko: "시즌 4", en: "Season 4" } },
-      { n: 5, title: { ko: "시즌 5", en: "Season 5" } },
-      { n: 6, title: { ko: "시즌 6", en: "Season 6" } },
-      { n: 7, title: { ko: "시즌 7", en: "Season 7" } },
+      { n: 1, title: { ko: "시즌 1", en: "Season 1" }, epCount: 62,
+        list: { en: "PLif0g7abcI4c40ertcukfxoRD4gQ6OR8f" } },
+      { n: 2, title: { ko: "시즌 2", en: "Season 2" }, epCount: 61,
+        list: { en: "PLif0g7abcI4fop7M-knWSn8_yPYvqqYCM" } },
+      { n: 3, title: { ko: "시즌 3", en: "Season 3" }, epCount: 113,
+        list: { en: "PLif0g7abcI4cYaXKsyzpoO54nu-ewMLjT" } },
+      { n: 4, title: { ko: "시즌 4", en: "Season 4" }, epCount: 55,
+        list: { en: "PLif0g7abcI4cczyOVHKF_OQv0sSujRZp5" } },
+      { n: 5, title: { ko: "시즌 5", en: "Season 5" }, epCount: 34,
+        list: { en: "PLif0g7abcI4c9ZeaFh0y7856Byc96o9J_" } },
+      { n: 6, title: { ko: "시즌 6", en: "Season 6" }, epCount: 34,
+        list: { en: "PLif0g7abcI4dlLFwXnEoVPDD-5GFgdkT8" } },
+      { n: 7, title: { ko: "시즌 7", en: "Season 7" }, epCount: 135,
+        list: { en: "PLif0g7abcI4f0DcIeRtFHgGvFPuD6uXVt" } },
     ],
   },
 
