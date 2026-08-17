@@ -458,6 +458,11 @@ h1, h2 { margin: 0; font-family: var(--serif); font-weight: 400; }
 .f input:focus { outline: none; border-bottom-color: var(--accent); }
 .f input::placeholder { color: var(--faint); }
 
+/* 빈칸 뒤에 '맘'이 붙는 입력칸 — ____맘 모양으로 읽히게 */
+.suffix { display: inline-flex; align-self: flex-start; align-items: baseline; gap: 5px; max-width: 100%; }
+.suffix input { width: 5.2em; flex: 0 1 auto; min-width: 0; }
+.suffix b { font-weight: 400; font-family: var(--serif); font-size: var(--md); color: var(--ink); }
+
 .chips { display: flex; gap: 8px; flex-wrap: wrap; }
 .chips button {
   font: inherit; font-family: var(--sans); font-size: var(--xs);
@@ -673,14 +678,20 @@ body.editing [data-field] {
 
       <div id="detailBlock">
         <label class="f">
-          <span>어머님 성함</span>
-          <input type="text" id="mom" placeholder="예: 김민지" autocomplete="name" />
+          <span>아이 이름만 적어주세요</span>
+          <span class="suffix">
+            <input type="text" id="mom" placeholder="예: 서준" enterkeyhint="done" />
+            <b>맘</b>
+          </span>
         </label>
 
-        <label class="f" style="margin-top:18px;">
-          <span>같이 오시는 분</span>
-          <input type="text" id="with" placeholder="예: 아이랑 단둘이 / 아빠도 함께" />
-        </label>
+        <div class="f" style="margin-top:18px;">
+          <span>아이도 같이 오나요?</span>
+          <div class="chips" role="group" aria-label="아이 동행 여부">
+            <button type="button" data-kid="y" aria-pressed="false">같이 가요</button>
+            <button type="button" data-kid="n" aria-pressed="false">저만 가요</button>
+          </div>
+        </div>
 
         <div class="f" style="margin-top:18px;">
           <span>올 것 같은 시간</span>
@@ -894,39 +905,50 @@ body.editing [data-field] {
   });
 
   /* ── 참석 알려주기 ────────────────────────────────── */
-  let going = null, slot = "";
+  let going = null, slot = "", kid = null;
   const yes = $("yes"), no = $("no"), err = $("err"), slip = $("slip"), copyBtn = $("copy");
 
   function setGoing(v) {
     going = v;
     yes.setAttribute("aria-pressed", String(v === true));
     no.setAttribute("aria-pressed", String(v === false));
-    $("detailBlock").style.opacity = v === false ? "0.45" : "1";
+    /* 못 오신다면 아이 동행·도착 시간은 물어볼 필요가 없다 */
+    const block = $("detailBlock");
+    block.style.opacity = v === false ? "0.4" : "1";
+    block.style.pointerEvents = v === false ? "none" : "";
+    block.inert = v === false;
     err.hidden = true;
   }
   yes.addEventListener("click", () => setGoing(true));
   no.addEventListener("click", () => setGoing(false));
 
-  document.querySelectorAll("[data-slot]").forEach((b) => {
-    b.addEventListener("click", () => {
-      const on = b.getAttribute("aria-pressed") !== "true";
-      document.querySelectorAll("[data-slot]").forEach((o) => o.setAttribute("aria-pressed", "false"));
-      b.setAttribute("aria-pressed", String(on));
-      slot = on ? b.dataset.slot : "";
+  /* 한 무리에서 하나만 켜지는 칩 — 다시 누르면 해제 */
+  function pickOne(attr, onPick) {
+    const group = document.querySelectorAll("[" + attr + "]");
+    group.forEach((b) => {
+      b.addEventListener("click", () => {
+        const on = b.getAttribute("aria-pressed") !== "true";
+        group.forEach((o) => o.setAttribute("aria-pressed", "false"));
+        b.setAttribute("aria-pressed", String(on));
+        onPick(on ? b.getAttribute(attr) : null);
+        err.hidden = true;
+      });
     });
-  });
+  }
+  pickOne("data-slot", (v) => (slot = v || ""));
+  pickOne("data-kid", (v) => (kid = v === null ? null : v === "y"));
 
   $("make").addEventListener("click", () => {
-    const mom = $("mom").value.trim();
+    const name = $("mom").value.trim().replace(/맘$/, "");
     if (going === null) { err.textContent = "갈게요 / 다음에 갈게요 중 하나를 먼저 눌러주세요."; err.hidden = false; return; }
-    if (!mom) { err.textContent = "성함을 적어주셔야 채이 엄마가 누군지 알 수 있어요."; err.hidden = false; $("mom").focus(); return; }
+    if (!name) { err.textContent = "아이 이름만 적어주시면 돼요. 누구신지 알아볼 수 있게요."; err.hidden = false; $("mom").focus(); return; }
+    if (going && kid === null) { err.textContent = "아이도 같이 오는지 알려주시면 간식 준비하는 데 도움이 돼요."; err.hidden = false; return; }
     err.hidden = true;
 
-    const lines = ["[채이네 오픈하우스]", "성함: " + mom];
+    const lines = ["[채이네 오픈하우스]", name + "맘"];
     if (going) {
       lines.push("참석: 갈게요");
-      const w = $("with").value.trim();
-      if (w) lines.push("같이: " + w);
+      lines.push("아이 동행: " + (kid ? "같이 가요" : "저만 가요"));
       if (slot) lines.push("도착: " + slot);
     } else {
       lines.push("참석: 이번엔 어려워요");
