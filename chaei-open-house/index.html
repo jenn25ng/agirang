@@ -402,6 +402,25 @@ h1, h2 { margin: 0; font-family: var(--serif); font-weight: 400; }
 .info dd { margin: 0; font-family: var(--serif); font-size: var(--md); line-height: 1.62; }
 .info dd small { display: block; font-family: var(--sans); font-size: var(--xs); color: var(--soft); margin-top: 5px; line-height: 1.6; }
 
+/* 9월 10일 0시까지 잠긴 주소 */
+.locked { display: flex; flex-direction: column; gap: 7px; }
+.locked[hidden] { display: none; }
+.locked b { font-weight: 400; color: var(--soft); }
+.locked small { font-family: var(--sans); font-size: var(--xs); color: var(--faint); line-height: 1.6; }
+.locked .cd {
+  align-self: flex-start;
+  margin-top: 3px;
+  font-family: var(--sans);
+  font-size: var(--xs);
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  background: #FDF2EF;
+  border: 1px solid rgba(217, 80, 59, 0.28);
+  border-radius: 999px;
+  padding: 5px 13px;
+  font-variant-numeric: tabular-nums;
+}
+
 /* RSVP */
 .rsvp {
   background: var(--card);
@@ -626,7 +645,14 @@ body.editing [data-field] {
     <dl class="info">
       <div class="row">
         <dt>주소</dt>
-        <dd data-field id="addr">서울특별시 영등포구 당산동<br />○○아파트 ○○○동 ○○○호</dd>
+        <dd>
+          <span class="locked" id="addrLock">
+            <b>9월 10일 0시에 열려요</b>
+            <small>그때가 되면 이 자리에 주소가 나타나요. 링크는 지금 그대로 두셔도 돼요.</small>
+            <span class="cd" id="countdown"></span>
+          </span>
+          <span data-field id="addr" hidden>서울 영등포구 당산로42길 16<br />현대5차아파트 502동 604호</span>
+        </dd>
       </div>
       <div class="row">
         <dt>연락처</dt>
@@ -929,14 +955,40 @@ body.editing [data-field] {
     setTimeout(() => (copyBtn.textContent = "복사하기"), 2800);
   });
 
-  /* ── 행사가 코앞이면 순서 생략 ────────────────────── */
-  const unlockAt = new Date("2026-09-10T00:00:00+09:00");
-  if (new Date() >= unlockAt) {
+  /* ── 9월 10일 0시(한국시간) ───────────────────────────
+     이 시각이 지나면 (1) 주소가 열리고 (2) 순서를 건너뛰고 초대장이 바로 뜬다.
+     주의: 정적 페이지라 주소 문자열은 HTML 소스 안에 이미 들어 있다.
+     화면에서 가려줄 뿐, 소스 보기로는 그 전에도 읽을 수 있다. */
+  const OPEN_AT = new Date("2026-09-10T00:00:00+09:00");
+  const addrLock = $("addrLock"), addr = $("addr"), countdown = $("countdown");
+
+  function applyGate() {
+    const left = OPEN_AT - new Date();
+    if (left <= 0) {
+      addrLock.hidden = true;
+      addr.hidden = false;
+      return true;
+    }
+    addrLock.hidden = false;
+    addr.hidden = true;
+    const min = Math.floor(left / 60000);
+    const days = Math.floor(min / 1440);
+    const hours = Math.floor((min % 1440) / 60);
+    countdown.textContent =
+      days > 0 ? (hours > 0 ? days + "일 " + hours + "시간 남음" : days + "일 남음")
+      : hours > 0 ? hours + "시간 " + (min % 60) + "분 남음"
+      : Math.max(min, 1) + "분 남음";
+    return false;
+  }
+
+  if (applyGate()) {
     root.classList.add("is-sunny");
     show("invite");
   } else {
     show("intro");
   }
+  /* 페이지를 켜둔 채 자정을 넘겨도 알아서 열리도록 */
+  setInterval(applyGate, 30000);
 })();
 </script>
 </body>
