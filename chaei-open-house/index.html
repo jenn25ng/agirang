@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#EFEDE6" />
+<meta name="description" content="9월 13일 일요일 오전 10시 — 오후 5시. 오시고 싶은 시간에 오셔서, 가시고 싶을 때 가시면 돼요." />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="채이네 첫 오픈하우스" />
+<meta property="og:description" content="9월 13일 일요일 10시 — 5시. 편한 시간에 놀러 와 주세요." />
+<meta property="og:locale" content="ko_KR" />
+<meta name="twitter:card" content="summary" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23D9503B'/%3E%3Cpath d='M6 14 16 7l10 7v11H6z' fill='none' stroke='%23FBFAF6' stroke-width='2.4' stroke-linejoin='round'/%3E%3C/svg%3E" />
+<title>채이네 첫 오픈하우스</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Song+Myung&family=Gowun+Dodum&display=swap" rel="stylesheet" />
+
+<style>
+:root {
+  /* 아침 골목 — 문 열기 전 */
+  --paper:   #EFEDE6;
+  --paper-2: #E4E1D8;
+  --card:    #FBFAF6;
+  --ink:     #2B2A25;
+  --soft:    #78746A;
+  --faint:   #A6A296;
+  --line:    #E0DCD1;
+  --accent:  #D9503B;   /* 채이의 색 */
+  --green:   #3F6B57;
+  --sun:     #EFBB44;
+  --sun-veil: rgba(239, 187, 68, 0);
+  --field:   rgba(217, 80, 59, 0.08);
+  --shadow:  0 18px 44px rgba(60, 52, 38, 0.13);
+
+  --serif: "Song Myung", AppleMyungjo, "Nanum Myeongjo", "Noto Serif KR", Batang, serif;
+  --sans: "Gowun Dodum", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+          Pretendard, "Noto Sans KR", "Malgun Gothic", sans-serif;
+
+  --xs: 0.74rem;
+  --sm: 0.86rem;
+  --md: 1rem;
+  --lg: 1.16rem;
+  --xl: 1.44rem;
+  --xxl: clamp(1.7rem, 6.6vw, 2.15rem);
+  --ease: cubic-bezier(0.2, 0.75, 0.25, 1);
+}
+
+/* 커튼을 연 뒤 — 햇빛 든 거실 */
+:root.is-sunny {
+  --paper:   #FAF5E9;
+  --paper-2: #F3EBD9;
+  --card:    #FFFDF8;
+  --sun-veil: rgba(239, 187, 68, 0.22);
+  --soft:    #7C7364;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  font-family: var(--sans);
+  color: var(--ink);
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(88% 48% at 84% -4%, var(--sun-veil), transparent 66%),
+    linear-gradient(178deg, var(--paper) 42%, var(--paper-2));
+  background-attachment: fixed;
+  overflow-x: hidden;
+  transition: background-color 1.5s var(--ease);
+  -webkit-text-size-adjust: 100%;
+  /* 한글은 단어 중간에서 끊지 않는다 — 주소·문장이 어색하게 잘리는 걸 막아줌 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.page {
+  width: 100%;
+  max-width: 440px;
+  min-height: 100dvh;
+  padding: 26px 22px 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+  gap: 26px;
+}
+
+h1, h2 { margin: 0; font-family: var(--serif); font-weight: 400; }
+
+/* ── 진행 표시 ─────────────────────────────────────────── */
+.rail { display: flex; justify-content: center; gap: 4px; }
+.rail-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 78px;
+  padding-top: 9px;
+  border-top: 2px solid var(--line);
+  transition: border-color 0.5s var(--ease);
+}
+.rail-step .n {
+  font-family: var(--serif);
+  font-size: var(--xs);
+  letter-spacing: 0.1em;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.4s;
+}
+.rail-step .t { font-size: var(--xs); color: var(--faint); transition: color 0.4s; }
+.rail-step[data-state="now"] { border-color: var(--accent); }
+.rail-step[data-state="now"] .n,
+.rail-step[data-state="now"] .t { color: var(--accent); }
+.rail-step[data-state="done"] { border-color: var(--ink); }
+.rail-step[data-state="done"] .n,
+.rail-step[data-state="done"] .t { color: var(--soft); }
+
+/* ── 장면 전환 ─────────────────────────────────────────── */
+.scene { display: none; }
+.scene:focus { outline: none; }
+.scene[data-active] {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  animation: enter 0.6s var(--ease) backwards;
+}
+@keyframes enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ── 카드 ──────────────────────────────────────────────── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  padding: 32px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: center;
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: var(--xs);
+  letter-spacing: 0.13em;
+  text-indent: 0.13em;
+  color: var(--accent);
+}
+.scene-title { font-size: var(--xl); line-height: 1.5; text-wrap: balance; }
+.scene-sub { margin: 0; font-size: var(--sm); line-height: 1.75; color: var(--soft); min-height: 3em; }
+
+/* ── 버튼 ──────────────────────────────────────────────── */
+.btn {
+  font: inherit;
+  font-family: var(--sans);
+  font-size: var(--sm);
+  letter-spacing: 0.04em;
+  padding: 15px 32px;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.15s var(--ease), opacity 0.2s;
+}
+.btn:active { transform: scale(0.97); }
+.btn:hover { opacity: 0.9; }
+.btn-ghost { background: transparent; color: var(--accent); }
+.btn-quiet {
+  font: inherit;
+  font-family: var(--sans);
+  font-size: var(--xs);
+  border: 0;
+  background: none;
+  color: var(--faint);
+  cursor: pointer;
+  padding: 8px 10px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: color 0.2s;
+}
+.btn-quiet:hover { color: var(--soft); }
+:where(button, [contenteditable="true"], input):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.skip { display: flex; justify-content: center; }
+
+/* ── 소품 무대 ─────────────────────────────────────────── */
+.stage { height: 190px; display: grid; place-items: center; width: 100%; position: relative; }
+
+/* 01 초인종 + 문패 */
+.bellplate {
+  border: 0; background: none; padding: 0; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.bellbox {
+  position: relative;
+  width: 74px; height: 74px;
+  border-radius: 18px;
+  border: 2px solid var(--ink);
+  background: var(--card);
+  display: grid; place-items: center;
+  transition: transform 0.15s var(--ease);
+}
+.bellplate:active .bellbox { transform: scale(0.94); }
+.bellbox .knob {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: var(--paper-2);
+  transition: background-color 0.35s, box-shadow 0.35s;
+}
+.bellplate[data-rang] .knob { background: var(--sun); box-shadow: 0 0 0 6px rgba(239, 187, 68, 0.3); }
+.bellbox .ring {
+  position: absolute; inset: -2px;
+  border: 2px solid var(--accent);
+  border-radius: 18px;
+  opacity: 0;
+}
+.bellplate[data-rang] .ring { animation: ripple 1.4s var(--ease) forwards; }
+.bellplate[data-rang] .ring:nth-of-type(2) { animation-delay: 0.2s; }
+@keyframes ripple {
+  0%   { opacity: 0.8; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2.1); }
+}
+.nameplate {
+  font-family: var(--serif);
+  font-size: var(--sm);
+  letter-spacing: 0.18em;
+  text-indent: 0.18em;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: 6px;
+  padding: 6px 16px;
+}
+
+/* 02 현관문 */
+.doorway {
+  position: relative;
+  width: 132px; height: 178px;
+  perspective: 820px;
+}
+.inside {
+  position: absolute; inset: 0;
+  border-radius: 12px 12px 0 0;
+  background: radial-gradient(84% 68% at 34% 46%, var(--sun), rgba(239, 187, 68, 0.15) 70%, transparent);
+  display: grid; place-items: center;
+  overflow: hidden;
+}
+.peek { transform: translateY(14px); opacity: 0; transition: opacity 0.5s 0.5s var(--ease), transform 0.6s 0.5s var(--ease); }
+.doorway[data-open] .peek { opacity: 1; transform: none; }
+.door {
+  position: absolute; inset: 0;
+  border: 2px solid var(--ink);
+  border-radius: 12px 12px 0 0;
+  background: var(--card);
+  transform-origin: left center;
+  transition: transform 1.05s var(--ease);
+  cursor: pointer;
+  padding: 0;
+}
+.door::before {
+  content: "";
+  position: absolute; inset: 14px 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 6px;
+}
+.door .knobb {
+  position: absolute; right: 13px; top: 50%;
+  width: 13px; height: 13px; margin-top: -6px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: var(--accent);
+}
+.doorway[data-open] .door { transform: rotateY(-104deg); }
+
+/* 03 커튼 */
+.window {
+  position: relative;
+  width: 176px; height: 158px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #CFE2EC, #EAF1E8);
+  cursor: pointer;
+  padding: 0;
+}
+.window .sky { position: absolute; inset: 0; display: grid; place-items: center; }
+.curtain {
+  position: absolute; top: 0; bottom: 0;
+  width: 52%;
+  background: repeating-linear-gradient(90deg, #E8E3D6 0 7px, #DED8C8 7px 14px);
+  transition: transform 1.05s var(--ease);
+}
+.curtain.l { left: 0; border-right: 1px solid var(--line); }
+.curtain.r { right: 0; border-left: 1px solid var(--line); }
+.window[data-open] .curtain.l { transform: translateX(-88%); }
+.window[data-open] .curtain.r { transform: translateX(88%); }
+.rod { position: absolute; top: 0; left: 0; right: 0; height: 6px; background: var(--ink); z-index: 2; }
+
+/* ── 문 열림 연출 ──────────────────────────────────────── */
+#reveal { position: fixed; inset: 0; z-index: 60; display: none; }
+#reveal[data-active] { display: flex; }
+#reveal .panel {
+  width: 50%; height: 100%;
+  background: var(--accent);
+  display: flex; align-items: center;
+  transition: transform 1.15s cubic-bezier(0.76, 0, 0.2, 1);
+}
+#reveal .l { justify-content: flex-end; }
+#reveal .r { justify-content: flex-start; }
+#reveal .emblem {
+  width: 60px; height: 60px; margin: 0 -30px;
+  border-radius: 50%;
+  background: var(--card);
+  display: grid; place-items: center;
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  color: var(--accent);
+  z-index: 2;
+  transition: opacity 0.4s, transform 0.4s;
+}
+#reveal[data-open] .l { transform: translateX(-100%); }
+#reveal[data-open] .r { transform: translateX(100%); }
+#reveal[data-open] .emblem { opacity: 0; transform: scale(0.5); }
+
+#fx { position: fixed; inset: 0; pointer-events: none; z-index: 70; }
+
+/* ── 초대장 본문 ───────────────────────────────────────── */
+#invite { gap: 18px; }
+
+.todo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #FDF2EF;
+  border: 1px solid rgba(217, 80, 59, 0.28);
+  border-radius: 14px;
+  padding: 15px 17px;
+  font-size: var(--sm);
+  line-height: 1.65;
+  color: var(--accent);
+}
+.todo b { font-weight: 400; font-family: var(--serif); }
+.todo[hidden] { display: none; }
+
+.masthead { display: flex; flex-direction: column; align-items: center; gap: 13px; text-align: center; padding: 8px 0 4px; }
+.masthead h1 { font-size: var(--xxl); line-height: 1.52; text-wrap: balance; }
+.masthead h1 em { font-style: normal; color: var(--accent); }
+.rule { width: 34px; height: 1px; background: var(--accent); opacity: 0.5; }
+.masthead p { margin: 0; font-size: var(--sm); line-height: 1.85; color: var(--soft); }
+.who {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 16px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--card);
+  font-size: var(--xs); letter-spacing: 0.06em; color: var(--accent);
+}
+.who .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+.label {
+  margin: 12px 0 0;
+  font-size: var(--xs);
+  letter-spacing: 0.1em;
+  text-indent: 0.1em;
+  color: var(--soft);
+  text-align: center;
+}
+
+/* 시간 띠 — 이 초대장에서 제일 중요한 정보 */
+.band {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 20px 20px 17px;
+  box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 13px;
+}
+.band-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.band-head .big { font-family: var(--serif); font-size: var(--lg); }
+.band-head .note { font-size: var(--xs); color: var(--green); }
+.hours { display: flex; align-items: flex-end; gap: 0; }
+.hour { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.hour .bar { width: 100%; height: 8px; background: var(--sun); }
+.hour:first-child .bar { border-radius: 4px 0 0 4px; }
+.hour:last-child .bar { border-radius: 0 4px 4px 0; }
+.hour .h { font-size: 0.7rem; color: var(--soft); font-variant-numeric: tabular-nums; }
+.band-foot { font-size: var(--xs); color: var(--faint); text-align: center; }
+
+.info {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 4px 20px;
+  box-shadow: var(--shadow);
+}
+.info .row { display: grid; grid-template-columns: 52px 1fr; gap: 14px; align-items: baseline; padding: 17px 0; }
+.info .row + .row { border-top: 1px solid var(--line); }
+.info dt { font-size: var(--xs); letter-spacing: 0.1em; color: var(--faint); padding-top: 0.3em; }
+.info dd { margin: 0; font-family: var(--serif); font-size: var(--md); line-height: 1.62; }
+.info dd small { display: block; font-family: var(--sans); font-size: var(--xs); color: var(--soft); margin-top: 5px; line-height: 1.6; }
+
+/* RSVP */
+.rsvp {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px 20px;
+  box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 18px;
+}
+.choice { display: flex; gap: 9px; }
+.choice button {
+  flex: 1;
+  font: inherit; font-family: var(--sans); font-size: var(--sm);
+  padding: 13px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--soft);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+.choice button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.choice button.no[aria-pressed="true"] { background: var(--soft); border-color: var(--soft); }
+
+.f { display: flex; flex-direction: column; gap: 8px; }
+.f > span { font-size: var(--xs); letter-spacing: 0.01em; color: var(--soft); }
+.f input {
+  font: inherit; font-family: var(--sans); font-size: var(--md);
+  padding: 11px 2px;
+  border: 0; border-bottom: 1.5px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  border-radius: 0;
+}
+.f input:focus { outline: none; border-bottom-color: var(--accent); }
+.f input::placeholder { color: var(--faint); }
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chips button {
+  font: inherit; font-family: var(--sans); font-size: var(--xs);
+  padding: 9px 15px; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--paper); color: var(--soft);
+  cursor: pointer; transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+.chips button[aria-pressed="true"] { background: var(--green); border-color: var(--green); color: #fff; }
+
+.slip {
+  background: var(--paper);
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  font-size: var(--sm);
+  line-height: 1.85;
+  white-space: pre-line;
+}
+.slip[hidden] { display: none; }
+.err { margin: 0; font-size: var(--xs); color: var(--accent); }
+.err[hidden] { display: none; }
+
+.sign { text-align: center; font-size: var(--xs); color: var(--faint); letter-spacing: 0.04em; padding: 6px 0 0; }
+.sign b { font-weight: 400; font-family: var(--serif); color: var(--accent); }
+.tools { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+
+/* 편집 모드 */
+body.editing [data-field] {
+  background: var(--field);
+  outline: 1px dashed rgba(217, 80, 59, 0.45);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  body { background: #fff; }
+  .rail, .tools, .skip, .todo, #fx, #reveal { display: none !important; }
+  .band, .info, .rsvp { box-shadow: none; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<div id="reveal" aria-hidden="true">
+  <div class="panel l"><div class="emblem">채</div></div>
+  <div class="panel r"></div>
+</div>
+
+<div class="page">
+
+  <div class="rail" id="rail">
+    <div class="rail-step" data-i="1"><span class="n">01</span><span class="t">초인종</span></div>
+    <div class="rail-step" data-i="2"><span class="n">02</span><span class="t">현관문</span></div>
+    <div class="rail-step" data-i="3"><span class="n">03</span><span class="t">커튼</span></div>
+  </div>
+
+  <!-- ── 인트로 ──────────────────────────────────────── -->
+  <section class="scene" tabindex="-1" id="intro" data-active>
+    <div class="card">
+      <p class="eyebrow">채이네 오픈하우스</p>
+      <h1 class="scene-title">들어오시는 순서<br />세 걸음이면 돼요</h1>
+      <p class="scene-sub">초인종을 누르고, 문을 열고, 커튼을 젖히면<br />초대장이 열립니다. 1분도 안 걸려요.</p>
+      <button class="btn" type="button" data-go="s1">채이네 문 앞에 서기</button>
+    </div>
+    <div class="skip"><button class="btn-quiet" type="button" data-go="invite">순서 건너뛰고 초대장 보기</button></div>
+  </section>
+
+  <!-- ── 01 초인종 ───────────────────────────────────── -->
+  <section class="scene" tabindex="-1" id="s1">
+    <div class="card">
+      <p class="eyebrow">첫 걸음</p>
+      <h2 class="scene-title">초인종을 눌러주세요</h2>
+      <div class="stage">
+        <button class="bellplate" type="button" id="bell" aria-label="초인종 누르기">
+          <div class="bellbox">
+            <span class="ring"></span><span class="ring"></span>
+            <span class="knob"></span>
+          </div>
+          <span class="nameplate">이채이</span>
+        </button>
+      </div>
+      <p class="scene-sub" id="hint1">채이가 제일 좋아하는 소리예요.</p>
+    </div>
+    <div class="skip"><button class="btn-quiet" type="button" data-go="invite">순서 건너뛰고 초대장 보기</button></div>
+  </section>
+
+  <!-- ── 02 현관문 ───────────────────────────────────── -->
+  <section class="scene" tabindex="-1" id="s2">
+    <div class="card">
+      <p class="eyebrow">두 걸음</p>
+      <h2 class="scene-title">문을 열어주세요</h2>
+      <div class="stage">
+        <div class="doorway" id="doorway">
+          <div class="inside">
+            <svg class="peek" width="58" height="58" viewBox="0 0 58 58" aria-hidden="true">
+              <circle cx="29" cy="30" r="17" fill="#FBFAF6" stroke="#2B2A25" stroke-width="2.4" />
+              <path d="M13 24c3-9 9-13 16-13s13 4 16 13c-4-3-9-4-16-4s-12 1-16 4z" fill="#2B2A25" />
+              <circle cx="23" cy="30" r="2.1" fill="#2B2A25" />
+              <circle cx="35" cy="30" r="2.1" fill="#2B2A25" />
+              <path d="M25 37c1.6 1.8 5.8 1.8 8 0" stroke="#2B2A25" stroke-width="2.2" stroke-linecap="round" fill="none" />
+              <circle cx="17" cy="35" r="2.6" fill="#D9503B" opacity=".55" />
+              <circle cx="41" cy="35" r="2.6" fill="#D9503B" opacity=".55" />
+            </svg>
+          </div>
+          <button class="door" type="button" id="door" aria-label="현관문 열기">
+            <span class="knobb"></span>
+          </button>
+        </div>
+      </div>
+      <p class="scene-sub" id="hint2">잠가두지 않았어요. 손잡이를 돌려보세요.</p>
+    </div>
+    <div class="skip"><button class="btn-quiet" type="button" data-go="invite">순서 건너뛰고 초대장 보기</button></div>
+  </section>
+
+  <!-- ── 03 커튼 ─────────────────────────────────────── -->
+  <section class="scene" tabindex="-1" id="s3">
+    <div class="card">
+      <p class="eyebrow">마지막 걸음</p>
+      <h2 class="scene-title">커튼을 젖혀주세요</h2>
+      <div class="stage">
+        <button class="window" type="button" id="window" aria-label="커튼 열기">
+          <span class="sky">
+            <svg width="70" height="70" viewBox="0 0 70 70" aria-hidden="true">
+              <circle cx="35" cy="32" r="13" fill="#EFBB44" />
+              <g stroke="#EFBB44" stroke-width="2.6" stroke-linecap="round">
+                <path d="M35 8v7M35 49v7M11 32h7M52 32h7M18 15l5 5M47 44l5 5M52 15l-5 5M23 44l-5 5" />
+              </g>
+            </svg>
+          </span>
+          <span class="rod"></span>
+          <span class="curtain l"></span>
+          <span class="curtain r"></span>
+        </button>
+      </div>
+      <p class="scene-sub" id="hint3">낮이 제일 긴 방이에요. 여기서 애들이 놀아요.</p>
+    </div>
+    <div class="skip"><button class="btn-quiet" type="button" data-go="invite">순서 건너뛰고 초대장 보기</button></div>
+  </section>
+
+  <!-- ── 초대장 ──────────────────────────────────────── -->
+  <section class="scene" tabindex="-1" id="invite">
+
+    <div class="todo" id="todo" hidden>
+      <b>보내기 전에 — 아직 비어 있어요</b>
+      <span id="todoList"></span>
+      <button class="btn btn-ghost" type="button" id="todoFix">지금 채우기</button>
+    </div>
+
+    <div class="masthead">
+      <p class="eyebrow" data-field>채이네 오픈하우스</p>
+      <h1 data-field>채이가 처음으로<br /><em>친구들을 부릅니다</em></h1>
+      <div class="rule"></div>
+      <p data-field>안녕하세요, 28개월 이채이예요.<br />저희 집에 처음으로 친구들을 초대해요.<br />편한 시간에 놀러 와 주세요.</p>
+      <span class="who"><span class="dot"></span><span data-field>이채이 · 28개월</span></span>
+    </div>
+
+    <p class="label">언제</p>
+    <div class="band">
+      <div class="band-head">
+        <span class="big" data-field>9월 13일 일요일</span>
+        <span class="note" data-field>아무 때나 · 드롭인</span>
+      </div>
+      <div class="hours">
+        <span class="hour"><span class="bar"></span><span class="h">10</span></span>
+        <span class="hour"><span class="bar"></span><span class="h">11</span></span>
+        <span class="hour"><span class="bar"></span><span class="h">12</span></span>
+        <span class="hour"><span class="bar"></span><span class="h">1</span></span>
+        <span class="hour"><span class="bar"></span><span class="h">2</span></span>
+        <span class="hour"><span class="bar"></span><span class="h">3</span></span>
+        <span class="hour"><span class="bar"></span><span class="h">4</span></span>
+        <span class="hour"><span class="bar"></span><span class="h">5</span></span>
+      </div>
+      <p class="band-foot" data-field>오전 10시부터 오후 5시까지 문 열어둘게요. 오시고 싶은 시간에 오셔서, 가시고 싶을 때 가시면 돼요.</p>
+    </div>
+
+    <p class="label">어디로</p>
+    <dl class="info">
+      <div class="row">
+        <dt>주소</dt>
+        <dd data-field id="addr">서울특별시 영등포구 당산동<br />○○아파트 ○○○동 ○○○호</dd>
+      </div>
+      <div class="row">
+        <dt>연락처</dt>
+        <dd data-field id="phone">010-○○○○-○○○○<br /><small>공동현관 앞에서 전화 주세요. 바로 열어드릴게요.</small></dd>
+      </div>
+      <div class="row">
+        <dt>참고</dt>
+        <dd data-field>편하게 왔다가 편하게 가는 자리예요<small>점심때 걸치시면 간단히 차려둘게요. 아이들 간식도 넉넉히 있어요. 선물은 정말 안 가져오셔도 됩니다.</small></dd>
+      </div>
+    </dl>
+
+    <p class="label">참석 알려주기</p>
+    <div class="rsvp">
+      <div class="choice" role="group" aria-label="참석 여부">
+        <button type="button" id="yes" aria-pressed="false">갈게요</button>
+        <button type="button" class="no" id="no" aria-pressed="false">다음에 갈게요</button>
+      </div>
+
+      <div id="detailBlock">
+        <label class="f">
+          <span>어머님 성함</span>
+          <input type="text" id="mom" placeholder="예: 김민지" autocomplete="name" />
+        </label>
+
+        <label class="f" style="margin-top:18px;">
+          <span>같이 오시는 분</span>
+          <input type="text" id="with" placeholder="예: 아이랑 단둘이 / 아빠도 함께" />
+        </label>
+
+        <div class="f" style="margin-top:18px;">
+          <span>올 것 같은 시간</span>
+          <div class="chips" role="group" aria-label="도착 시간대">
+            <button type="button" data-slot="오전 (10–12시)" aria-pressed="false">오전 10–12시</button>
+            <button type="button" data-slot="점심 무렵 (12–2시)" aria-pressed="false">점심 무렵</button>
+            <button type="button" data-slot="오후 (2–5시)" aria-pressed="false">오후 2–5시</button>
+          </div>
+        </div>
+      </div>
+
+      <p class="err" id="err" hidden></p>
+      <button class="btn" type="button" id="make">카톡에 보낼 문장 만들기</button>
+      <div class="slip" id="slip" hidden></div>
+      <button class="btn btn-ghost" type="button" id="copy" hidden>복사하기</button>
+    </div>
+
+    <p class="sign">채이가 <b data-field>기다리고 있을게요</b></p>
+
+    <div class="tools">
+      <button class="btn-quiet" type="button" id="editBtn" aria-pressed="false">✏️ 내용 고치기</button>
+      <button class="btn-quiet" type="button" data-go="intro" id="again">처음부터 다시</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const root = document.documentElement;
+  const $ = (id) => document.getElementById(id);
+  const scenes = document.querySelectorAll(".scene");
+  const railSteps = document.querySelectorAll(".rail-step");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ── 장면 ─────────────────────────────────────────── */
+  const stepOf = { intro: 0, s1: 1, s2: 2, s3: 3, invite: 4 };
+
+  function show(id) {
+    scenes.forEach((s) => s.toggleAttribute("data-active", s.id === id));
+    const step = stepOf[id];
+    $("rail").style.visibility = step === 0 || step === 4 ? "hidden" : "visible";
+    railSteps.forEach((el) => {
+      const i = Number(el.dataset.i);
+      el.dataset.state = i < step ? "done" : i === step ? "now" : "";
+    });
+    if (id === "invite") checkTodo();
+    /* 새 장면 자체로 초점을 옮긴다 — 스크린리더는 바뀐 내용을 읽고,
+       소품 버튼에는 초점 테두리가 그려지지 않는다 */
+    const scene = $(id);
+    if (scene) scene.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+  }
+
+  document.querySelectorAll("[data-go]").forEach((b) => {
+    b.addEventListener("click", () => {
+      if (b.dataset.go === "intro") resetSteps();
+      if (b.dataset.go === "invite" && !root.classList.contains("is-sunny")) root.classList.add("is-sunny");
+      show(b.dataset.go);
+    });
+  });
+
+  function resetSteps() {
+    root.classList.remove("is-sunny");
+    bell.removeAttribute("data-rang");
+    doorway.removeAttribute("data-open");
+    win.removeAttribute("data-open");
+    hint1.textContent = "채이가 제일 좋아하는 소리예요.";
+    hint2.textContent = "잠가두지 않았어요. 손잡이를 돌려보세요.";
+    hint3.textContent = "낮이 제일 긴 방이에요. 여기서 애들이 놀아요.";
+  }
+
+  /* ── 01 초인종 ────────────────────────────────────── */
+  const bell = $("bell"), hint1 = $("hint1");
+  bell.addEventListener("click", () => {
+    if (bell.hasAttribute("data-rang")) return;
+    bell.setAttribute("data-rang", "");
+    hint1.textContent = "딩— 동—";
+    setTimeout(() => (hint1.textContent = "안에서 발소리가 나요."), 950);
+    setTimeout(() => show("s2"), 1750);
+  });
+
+  /* ── 02 현관문 ────────────────────────────────────── */
+  const doorway = $("doorway"), hint2 = $("hint2");
+  $("door").addEventListener("click", () => {
+    if (doorway.hasAttribute("data-open")) return;
+    doorway.setAttribute("data-open", "");
+    hint2.textContent = "채이가 빼꼼 — 신발은 아무 데나 벗으세요.";
+    setTimeout(() => show("s3"), 2000);
+  });
+
+  /* ── 03 커튼 ──────────────────────────────────────── */
+  const win = $("window"), hint3 = $("hint3");
+  win.addEventListener("click", () => {
+    if (win.hasAttribute("data-open")) return;
+    win.setAttribute("data-open", "");
+    root.classList.add("is-sunny");
+    hint3.textContent = "햇빛 들어왔어요. 어서 오세요.";
+    setTimeout(playReveal, 1500);
+  });
+
+  /* ── 문 열림 연출 ─────────────────────────────────── */
+  function playReveal() {
+    const rev = $("reveal");
+    scenes.forEach((s) => s.removeAttribute("data-active"));
+    $("invite").setAttribute("data-active", "");
+    checkTodo();
+    $("rail").style.visibility = "hidden";
+    rev.setAttribute("data-active", "");
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        rev.setAttribute("data-open", "");
+        confetti(90);
+      }, reduce ? 0 : 260);
+    });
+    setTimeout(() => {
+      rev.removeAttribute("data-active");
+      rev.removeAttribute("data-open");
+      window.scrollTo({ top: 0, behavior: "auto" });
+    }, reduce ? 60 : 1550);
+  }
+
+  /* ── 종이 꽃가루 ──────────────────────────────────── */
+  const cv = $("fx"), cx = cv.getContext("2d");
+  let bits = [], raf = 0;
+
+  function sizeCanvas() {
+    const d = window.devicePixelRatio || 1;
+    cv.width = window.innerWidth * d;
+    cv.height = window.innerHeight * d;
+    cv.style.width = window.innerWidth + "px";
+    cv.style.height = window.innerHeight + "px";
+    cx.setTransform(d, 0, 0, d, 0, 0);
+  }
+  sizeCanvas();
+  window.addEventListener("resize", sizeCanvas);
+
+  function confetti(n) {
+    if (reduce) return;
+    const colors = ["#D9503B", "#EFBB44", "#3F6B57", "#FBFAF6", "#E8B9A9"];
+    const w = window.innerWidth;
+    for (let i = 0; i < n; i++) {
+      bits.push({
+        x: w * (0.2 + Math.random() * 0.6),
+        y: window.innerHeight * 0.34,
+        vx: (Math.random() - 0.5) * 6.2,
+        vy: -3 - Math.random() * 7,
+        w: 5 + Math.random() * 6,
+        h: 8 + Math.random() * 7,
+        a: Math.random() * Math.PI,
+        va: (Math.random() - 0.5) * 0.22,
+        c: colors[(Math.random() * colors.length) | 0],
+        life: 150 + Math.random() * 60
+      });
+    }
+    if (!raf) raf = requestAnimationFrame(tick);
+  }
+
+  function tick() {
+    cx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    bits = bits.filter((b) => b.life > 0 && b.y < window.innerHeight + 40);
+    bits.forEach((b) => {
+      b.life--;
+      b.vy += 0.16;
+      b.vx *= 0.995;
+      b.x += b.vx;
+      b.y += b.vy;
+      b.a += b.va;
+      cx.save();
+      cx.translate(b.x, b.y);
+      cx.rotate(b.a);
+      cx.globalAlpha = Math.min(1, b.life / 45);
+      cx.fillStyle = b.c;
+      cx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
+      cx.restore();
+    });
+    raf = bits.length ? requestAnimationFrame(tick) : 0;
+    if (!raf) cx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  }
+
+  /* ── 주소·연락처 빈칸 알림 (보내는 사람용) ────────── */
+  function checkTodo() {
+    const missing = [];
+    if ($("addr").innerText.includes("○")) missing.push("상세 주소");
+    if ($("phone").innerText.includes("○")) missing.push("연락처");
+    const box = $("todo");
+    if (missing.length) {
+      $("todoList").textContent = missing.join(", ") + " — 채우지 않으면 받는 분이 찾아올 수 없어요.";
+      box.hidden = false;
+    } else {
+      box.hidden = true;
+    }
+  }
+  $("todoFix").addEventListener("click", () => {
+    if (!document.body.classList.contains("editing")) editBtn.click();
+    $("addr").focus();
+    $("addr").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+  });
+
+  /* ── 내용 고치기 ──────────────────────────────────── */
+  const editBtn = $("editBtn");
+  const fields = document.querySelectorAll("[data-field]");
+  editBtn.addEventListener("click", () => {
+    const on = document.body.classList.toggle("editing");
+    fields.forEach((el) => el.setAttribute("contenteditable", on ? "true" : "false"));
+    editBtn.setAttribute("aria-pressed", String(on));
+    editBtn.textContent = on ? "✓ 다 고쳤어요" : "✏️ 내용 고치기";
+    if (!on) checkTodo();
+  });
+
+  /* ── 참석 알려주기 ────────────────────────────────── */
+  let going = null, slot = "";
+  const yes = $("yes"), no = $("no"), err = $("err"), slip = $("slip"), copyBtn = $("copy");
+
+  function setGoing(v) {
+    going = v;
+    yes.setAttribute("aria-pressed", String(v === true));
+    no.setAttribute("aria-pressed", String(v === false));
+    $("detailBlock").style.opacity = v === false ? "0.45" : "1";
+    err.hidden = true;
+  }
+  yes.addEventListener("click", () => setGoing(true));
+  no.addEventListener("click", () => setGoing(false));
+
+  document.querySelectorAll("[data-slot]").forEach((b) => {
+    b.addEventListener("click", () => {
+      const on = b.getAttribute("aria-pressed") !== "true";
+      document.querySelectorAll("[data-slot]").forEach((o) => o.setAttribute("aria-pressed", "false"));
+      b.setAttribute("aria-pressed", String(on));
+      slot = on ? b.dataset.slot : "";
+    });
+  });
+
+  $("make").addEventListener("click", () => {
+    const mom = $("mom").value.trim();
+    if (going === null) { err.textContent = "갈게요 / 다음에 갈게요 중 하나를 먼저 눌러주세요."; err.hidden = false; return; }
+    if (!mom) { err.textContent = "성함을 적어주셔야 채이 엄마가 누군지 알 수 있어요."; err.hidden = false; $("mom").focus(); return; }
+    err.hidden = true;
+
+    const lines = ["[채이네 오픈하우스]", "성함: " + mom];
+    if (going) {
+      lines.push("참석: 갈게요");
+      const w = $("with").value.trim();
+      if (w) lines.push("같이: " + w);
+      if (slot) lines.push("도착: " + slot);
+    } else {
+      lines.push("참석: 이번엔 어려워요");
+    }
+    const text = lines.join("\n");
+    slip.textContent = text;
+    slip.dataset.raw = text;
+    slip.hidden = false;
+    copyBtn.hidden = false;
+    copyBtn.textContent = "복사하기";
+    slip.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+    if (going) confetti(40);
+  });
+
+  copyBtn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(slip.dataset.raw);
+      copyBtn.textContent = "복사했어요 — 카톡에 붙여넣어 주세요";
+    } catch {
+      const sel = window.getSelection(), r = document.createRange();
+      r.selectNodeContents(slip);
+      sel.removeAllRanges();
+      sel.addRange(r);
+      copyBtn.textContent = "선택했어요 — 길게 눌러 복사해 주세요";
+    }
+    setTimeout(() => (copyBtn.textContent = "복사하기"), 2800);
+  });
+
+  /* ── 행사가 코앞이면 순서 생략 ────────────────────── */
+  const unlockAt = new Date("2026-09-10T00:00:00+09:00");
+  if (new Date() >= unlockAt) {
+    root.classList.add("is-sunny");
+    show("invite");
+  } else {
+    show("intro");
+  }
+})();
+</script>
+</body>
+</html>
